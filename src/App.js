@@ -67,6 +67,7 @@ const reducer= (state,{type,payload})=>{
         currentOperator: state.currentOperator.slice(0,-1)
       }
     case actions.Evaluate:
+
       if(state.operator==null || state.previousOperator== null || state.currentOperator==null) return state
       return{
         ...state,
@@ -80,16 +81,18 @@ const reducer= (state,{type,payload})=>{
   }
 };
 
-function evaluate({currentOperator,previousOperator,operator}){
+function evaluate({currentOperator,operator,previousOperator}){
   let a= parseFloat(previousOperator);
   let b= parseFloat(currentOperator);
   if(isNaN(a) || isNaN(b)) return ""
+  
   switch(operator){
     case '+':
       return a+b;
     case '-':
       return a-b;
     case '/':
+      if(b===0) throw console.error("invald input, divisor cannot be 0");
       return a/b;
     case '*':
       return a*b;
@@ -102,11 +105,10 @@ const INTERGER_FORMATTER = new Intl.NumberFormat("en-us",{
   maximumFractionDigits:0,
 })
 function formatOperator(operand) {
-  if(operand==null) return 
-  const [interger,decimal]=operand.split(".")
-  if(decimal==null) return INTERGER_FORMATTER.format(interger)
-  return `${INTERGER_FORMATTER.format(interger)}.${decimal}`
-
+  if(operand==null) return operand;
+  const [interger,decimal] = String(operand).split(".");
+  if(decimal==null) return INTERGER_FORMATTER.format(interger);
+  return `${INTERGER_FORMATTER.format(interger)}.${decimal}`;
 }
 
 function App() {
@@ -124,7 +126,7 @@ function App() {
           <td colSpan={'2'} onClick={()=>dispatch({type: actions.CLEAR})}><button>AC</button></td>
           <td><button onClick={()=>dispatch({type:actions.delete_digit})}>Del</button></td>
           <td>
-            <DigitButton digit="/" dispatch={dispatch}/>
+            <OperationButton operation="/" dispatch={dispatch}/>
           </td>
         </tr>
         <tr>
